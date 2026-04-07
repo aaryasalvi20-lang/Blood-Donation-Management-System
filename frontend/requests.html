@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar (Shared Dynamic Sidebar) -->
+    <aside class="w-64 bg-white shadow-xl flex flex-col z-20 dark:bg-gray-800 transition-colors duration-300">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
+            <svg class="h-8 w-8 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+            <span class="ml-2 text-xl font-bold">BloodConnect</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <nav class="px-3 space-y-1" id="sidebar-nav">
+                <!-- Navigation links will be injected by script.js correctly based on role -->
+            </nav>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 dark:bg-gray-800 dark:border-b dark:border-gray-700 z-10 transition-colors duration-300">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Requests Management</h1>
+            <div class="flex items-center space-x-4">
+                <div class="relative flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold shadow-inner"><span class="user-init">U</span></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200 user-name-display">User Name</span>
+                    <button id="logout-btn" class="ml-4 text-sm font-medium text-red-600 hover:text-red-500">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 pt-8 pb-12">
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white" id="page-title">Blood Requests</h2>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" id="page-subtitle">Manage and track urgent blood requirements.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div id="donor-filter-container" data-role-only="donor" class="hidden">
+                            <select id="filter-blood-group" class="rounded-lg border-gray-200 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm px-4 py-2 border transition">
+                                <option value="">All Blood Groups</option>
+                                <option value="A+">A+</option><option value="A-">A-</option>
+                                <option value="B+">B+</option><option value="B-">B-</option>
+                                <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                                <option value="O+">O+</option><option value="O-">O-</option>
+                            </select>
+                        </div>
+                        <button id="open-modal-btn" data-role-only="hospital" class="hidden inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all">
+                            <i class="fas fa-plus mr-2"></i> Create Request
+                        </button>
+                    </div>
+                </div>
+
+                <div id="requests-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Create Request Modal (Hospital Only) -->
+            <div id="request-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:bg-gray-800">
+                        <div class="bg-primary px-6 py-4 flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-white"><i class="fas fa-hand-holding-medical mr-2"></i> New Blood Request</h3>
+                            <button type="button" class="text-white hover:text-gray-200" onclick="document.getElementById('request-modal').classList.add('hidden')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form id="create-request-form">
+                            <div class="px-6 py-6 space-y-4">
+                                <div id="modal-error" class="hidden p-3 rounded-xl bg-red-100 text-red-700 text-sm border-l-4 border-red-500"></div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Blood Group</label>
+                                        <select name="blood_group" required class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2 border transition">
+                                            <option value="A+">A+</option><option value="A-">A-</option>
+                                            <option value="B+">B+</option><option value="B-">B-</option>
+                                            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                                            <option value="O+">O+</option><option value="O-">O-</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Units (ml)</label>
+                                        <input type="number" name="units_required" required min="1" placeholder="e.g. 500" class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2 border transition">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Urgency</label>
+                                        <select name="urgency" required class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2 border transition">
+                                            <option value="low">Low Priority</option>
+                                            <option value="medium" selected>Medium</option>
+                                            <option value="high">High</option>
+                                            <option value="critical">Critical (Urgent)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Location / Ward</label>
+                                        <input type="text" name="location" required placeholder="e.g. Ward A" class="block w-full rounded-lg border-gray-200 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2 border transition">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse dark:bg-gray-700/50">
+                                <button type="submit" id="modal-submit-btn" class="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-primary text-base font-bold text-white hover:bg-red-700 transition sm:ml-3 sm:text-sm">
+                                    <span id="modal-btn-text">Submit Request</span>
+                                    <div id="modal-btn-spinner" class="spinner hidden ml-2 border-white border-t-transparent w-4 h-4 border-2"></div>
+                                </button>
+                                <button type="button" onclick="document.getElementById('request-modal').classList.add('hidden')" class="inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:text-sm dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Tracker Modal (Hospital Only) -->
+            <div id="response-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-middle bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                        <div class="bg-gradient-to-r from-gray-800 to-gray-700 px-6 py-5 flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-white flex items-center">
+                                <i class="fas fa-users-viewfinder mr-3 text-red-500"></i> Interested Donors
+                            </h3>
+                            <button type="button" class="text-gray-300 hover:text-white transition" onclick="document.getElementById('response-modal').classList.add('hidden')">
+                                <i class="fas fa-times text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="px-6 py-6 max-h-[60vh] overflow-y-auto bg-gray-50 dark:bg-gray-900/50" id="response-list">
+                            <!-- Injected by script -->
+                        </div>
+                        <div class="bg-white px-6 py-4 dark:bg-gray-800 text-right border-t border-gray-100 dark:border-gray-700">
+                            <button type="button" onclick="document.getElementById('response-modal').classList.add('hidden')" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition dark:bg-gray-700 dark:text-gray-200">
+                                Close Window
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth();
+            const grid = document.getElementById('requests-grid');
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+            const filterBlood = document.getElementById('filter-blood-group');
+            
+            let allRequests = [];
+
+            // Adjust page based on role
+            if (user.role === 'donor') {
+                pageTitle.textContent = "Available Blood Requests";
+                pageSubtitle.textContent = "Browse and support urgent blood requirements in your area.";
+                if (filterBlood) {
+                    filterBlood.addEventListener('change', renderRequests);
+                }
+            } else {
+                pageTitle.textContent = "Manage Requests";
+                pageSubtitle.textContent = "Monitor active requirements and track donor responses.";
+            }
+
+            // Modal Logic
+            const modal = document.getElementById('request-modal');
+            const openBtn = document.getElementById('open-modal-btn');
+            const form = document.getElementById('create-request-form');
+
+            if (openBtn) {
+                openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const errDiv = document.getElementById('modal-error');
+                const btnText = document.getElementById('modal-btn-text');
+                const btnSpin = document.getElementById('modal-btn-spinner');
+                
+                errDiv.classList.add('hidden');
+                btnText.classList.add('hidden');
+                btnSpin.classList.remove('hidden');
+
+                const payload = {
+                    blood_group: form.blood_group.value,
+                    units_required: form.units_required.value,
+                    urgency: form.urgency.value,
+                    location: form.location.value
+                };
+
+                try {
+                    await apiFetch('/requests', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    modal.classList.add('hidden');
+                    form.reset();
+                    fetchRequests();
+                } catch (err) {
+                    errDiv.textContent = err.message;
+                    errDiv.classList.remove('hidden');
+                } finally {
+                    btnText.classList.remove('hidden');
+                    btnSpin.classList.add('hidden');
+                }
+            });
+
+            async function fetchRequests() {
+                try {
+                    allRequests = await apiFetch('/requests');
+                    renderRequests();
+                } catch (e) {
+                    grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">Error loading requests: ${e.message}</div>`;
+                }
+            }
+
+            function renderRequests() {
+                let filtered = allRequests;
+                if (user.role === 'donor' && filterBlood.value) {
+                    filtered = allRequests.filter(r => r.blood_group === filterBlood.value);
+                }
+
+                grid.innerHTML = '';
+                
+                if (filtered.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center py-20 bg-white dark:bg-gray-800 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-700">
+                        <i class="fas fa-clipboard-list text-gray-200 text-6xl mb-4"></i>
+                        <p class="text-gray-400 font-medium">No blood requests matching your criteria.</p>
+                    </div>`;
+                    return;
+                }
+
+                const urgencyStyles = {
+                    critical: 'bg-red-600 text-white animate-pulse shadow-lg shadow-red-500/20',
+                    high: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-800',
+                    medium: 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400 border border-yellow-100 dark:border-yellow-800',
+                    low: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 border border-green-100 dark:border-green-800'
+                };
+
+                filtered.forEach(req => {
+                    const date = new Date(req.created_at).toLocaleDateString();
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-3xl shadow-sm border border-gray-50 flex flex-col dark:bg-gray-800 dark:border-gray-700/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group overflow-hidden relative p-6";
+                    
+                    const actionBtn = user.role === 'hospital'
+                        ? `<button onclick="viewResponses(${req.id})" class="w-full mt-6 py-2.5 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-2xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center justify-center">
+                            <i class="fas fa-users mr-2 opacity-50"></i> View ${req.response_count || 0} Responses
+                           </button>`
+                        : `<button onclick="acceptRequest(${req.id}, this)" class="w-full mt-6 py-3 bg-primary/10 text-primary rounded-2xl text-sm font-black hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center transform active:scale-95">
+                            <i class="fas fa-heart-pulse mr-2"></i> Support Now
+                           </button>`;
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="h-14 w-14 rounded-2xl bg-red-50 dark:bg-red-900/20 text-primary flex items-center justify-center text-2xl font-black shadow-inner">
+                                ${req.blood_group}
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${urgencyStyles[req.urgency] || ''}">${req.urgency}</span>
+                        </div>
+                        <div class="mt-6 flex-1">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors leading-tight">${req.hospital_name || 'Emergency Unit'}</h3>
+                            <div class="mt-4 space-y-2.5">
+                                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="w-7 h-7 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center mr-3">
+                                        <i class="fas fa-map-marker-alt text-gray-400 text-xs"></i>
+                                    </div>
+                                    <span class="font-medium">${req.location}</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="w-7 h-7 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center mr-3">
+                                        <i class="fas fa-vial text-primary text-xs"></i>
+                                    </div>
+                                    <span class="font-medium">${req.units_required}ml Required</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-auto">
+                            ${actionBtn}
+                            <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50 flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                <span>Ref: #${req.id}</span>
+                                <span>${date}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            window.acceptRequest = async (id, btn) => {
+                if (!confirm('Proceeding will share your intent to donate with the requesting hospital. Continue?')) return;
+                try {
+                    const original = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> processing';
+                    
+                    await apiFetch(`/requests/${id}/respond`, { method: 'POST' });
+                    
+                    btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Commitment Sent';
+                    btn.classList.add('bg-green-500', 'text-white', 'border-transparent');
+                    btn.classList.remove('bg-primary/10', 'text-primary');
+                    btn.onclick = null;
+                } catch (err) {
+                    alert(err.message);
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            };
+
+            window.viewResponses = async (id) => {
+                const modal = document.getElementById('response-modal');
+                const list = document.getElementById('response-list');
+                modal.classList.remove('hidden');
+                list.innerHTML = `<div class="text-center py-10">
+                    <i class="fas fa-spinner fa-spin text-primary text-3xl mb-3"></i>
+                    <p class="text-gray-500 italic animate-pulse">Retrieving donor profiles...</p>
+                </div>`;
+                
+                try {
+                    const responses = await apiFetch(`/requests/${id}/responses`);
+                    if (responses.length === 0) {
+                        list.innerHTML = `<div class="text-center py-12 bg-white rounded-3xl dark:bg-gray-800">
+                            <i class="fas fa-ghost text-gray-200 text-6xl mb-4"></i>
+                            <p class="text-gray-400 italic">No responses recorded yet.</p>
+                        </div>`;
+                        return;
+                    }
+
+                    list.innerHTML = responses.map(res => `
+                        <div class="flex items-center space-x-5 p-5 bg-white border border-gray-100 rounded-3xl mb-4 dark:bg-gray-800 dark:border-gray-700 hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+                            <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center font-black text-2xl shadow-lg ring-4 ring-red-500/10">
+                                ${(res.donor_name || 'U')[0]}
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-black text-gray-900 dark:text-white text-lg">${res.donor_name}</h4>
+                                <div class="flex flex-wrap gap-y-1 gap-x-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    <span class="flex items-center"><i class="fas fa-envelope mr-1.5 opacity-60"></i> ${res.donor_email}</span>
+                                    <span class="flex items-center"><i class="fas fa-location-dot mr-1.5 opacity-60"></i> ${res.donor_location}</span>
+                                    <span class="flex items-center font-bold text-primary italic"><i class="fas fa-droplet mr-1.5 opacity-60"></i> Group ${res.donor_blood_group}</span>
+                                </div>
+                            </div>
+                            <div class="hidden sm:block text-right">
+                                <div class="text-[9px] text-gray-400 uppercase tracking-widest font-black mb-1">Response Date</div>
+                                <div class="text-sm font-bold text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded-full">${new Date(res.created_at).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    list.innerHTML = `<div class="text-center text-red-500 py-10">${err.message}</div>`;
+                }
+            };
+
+            fetchRequests();
+        });
+    </script>
+</body>
+</html>

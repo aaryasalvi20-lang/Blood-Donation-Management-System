@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Dashboard - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { primary: '#dc2626' } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md dark:bg-gray-800 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
+            <svg class="h-8 w-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+            <span class="ml-2 text-xl font-bold">BloodConnect</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <nav class="space-y-1 px-3" id="sidebar-nav">
+                <!-- Injected by script.js -->
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="theme-toggle" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition">
+                <i class="fas fa-moon mr-2 dark:hidden" id="moon-icon"></i>
+                <i class="fas fa-sun mr-2 hidden dark:inline-block" id="sun-icon"></i>
+                Toggle Theme
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content wrapper -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 dark:bg-gray-800 dark:border-b dark:border-gray-700 z-10 transition-colors duration-300">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Hospital Dashboard</h1>
+            
+            <div class="flex items-center space-x-4">
+                <button class="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none dark:hover:text-gray-300 transition" onclick="window.location.href='notifications.html'">
+                    <span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary ring-2 ring-white dark:ring-gray-800"></span>
+                    <i class="fas fa-bell text-xl"></i>
+                </button>
+                
+                <div class="relative flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                        <span class="user-init">H</span>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200 user-name-display">Hospital Name</span>
+                    <button id="logout-btn" class="ml-4 text-sm font-medium text-red-600 hover:text-red-500 transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6">
+            
+            <!-- Quick Actions Banner -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Need blood units urgently?</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Create a request and notify eligible donors in your vicinity immediately.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="requests.html" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-red-700 transition">
+                        <i class="fas fa-plus mr-2"></i> New Request
+                    </a>
+                    <a href="donors.html" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 transition">
+                        <i class="fas fa-search mr-2"></i> Find Donors
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Active Requests</p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white" id="stat-active-requests">-</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Critical Units</p>
+                    <p class="text-2xl font-black text-primary" id="stat-critical-requests">-</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Eligible Donors nearby</p>
+                    <p class="text-2xl font-black text-green-600" id="stat-total-donors">-</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                    <p class="text-xs font-bold text-gray-400 uppercase mb-1">Total Fulfilled</p>
+                    <p class="text-2xl font-black text-gray-900 dark:text-white" id="stat-fulfilled-requests">-</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- My Active Requests -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Our Active Blood Requests</h2>
+                            <a href="requests.html" class="text-xs font-bold text-primary hover:underline">View All</a>
+                        </div>
+                        <div id="hospital-requests-list" class="space-y-4">
+                            <div class="animate-pulse flex items-center p-4 bg-gray-50 rounded-xl">
+                                <div class="h-10 w-10 bg-gray-200 rounded-full mr-4"></div>
+                                <div class="flex-1 h-4 bg-gray-200 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Donors Sidebar -->
+                <div>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Available Nearby</h2>
+                            <a href="donors.html" class="text-xs font-bold text-primary hover:underline">Full Search</a>
+                        </div>
+                        <div id="nearby-donors-list" class="space-y-4">
+                            <div class="text-center py-8 text-gray-400">Loading local donors...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth();
+            if(!user || user.role !== 'hospital') return;
+            
+            // Set User Inititals
+            document.querySelectorAll('.user-init').forEach(el => {
+                el.textContent = user.name.charAt(0).toUpperCase();
+            });
+
+            async function loadHospitalData() {
+                try {
+                    const donors = await apiFetch('/donors');
+                    const requests = await apiFetch('/requests');
+                    
+                    const myRequests = requests.filter(r => r.hospital_id === user.id);
+                    const activeMyRequests = myRequests.filter(r => r.status === 'active');
+                    const criticalMyRequests = activeMyRequests.filter(r => r.urgency === 'critical');
+                    const fulfilledMyRequests = myRequests.filter(r => r.status === 'fulfilled');
+
+                    // Stats
+                    document.getElementById('stat-active-requests').textContent = activeMyRequests.length;
+                    document.getElementById('stat-critical-requests').textContent = criticalMyRequests.length;
+                    document.getElementById('stat-total-donors').textContent = donors.filter(d => d.is_available).length;
+                    document.getElementById('stat-fulfilled-requests').textContent = fulfilledMyRequests.length;
+
+                    // My Requests List
+                    const reqList = document.getElementById('hospital-requests-list');
+                    if (activeMyRequests.length === 0) {
+                        reqList.innerHTML = `<div class="text-center py-10 text-gray-500">No active requests. Start by creating one!</div>`;
+                    } else {
+                        reqList.innerHTML = activeMyRequests.map(req => `
+                            <div class="p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="h-10 w-10 bg-red-50 text-primary rounded-xl flex items-center justify-center font-black dark:bg-red-900/20">
+                                            ${req.blood_group}
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-gray-900 dark:text-white leading-tight">${req.units_required} Units Required</p>
+                                            <p class="text-[10px] text-gray-500 uppercase tracking-widest">${req.location}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        ${getUrgencyBadge(req.urgency)}
+                                    </div>
+                                </div>
+                                <div class="pt-3 border-t border-gray-50 dark:border-gray-700 flex items-center justify-between">
+                                    <div class="flex items-center text-xs font-bold text-primary">
+                                        <i class="fas fa-users mr-1.5 opacity-60"></i> ${req.response_count || 0} Donors Accepted
+                                    </div>
+                                    <a href="requests.html" class="text-[10px] font-black text-gray-400 hover:text-primary transition uppercase tracking-tighter">Manage <i class="fas fa-chevron-right ml-1"></i></a>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                    // Nearby Donors (simulated filter)
+                    const donorsList = document.getElementById('nearby-donors-list');
+                    const nearbyDonors = donors.filter(d => d.is_available).slice(0, 5);
+                    
+                    if (nearbyDonors.length === 0) {
+                        donorsList.innerHTML = `<div class="text-center py-4 text-gray-500 px-4">No donors found nearby.</div>`;
+                    } else {
+                        donorsList.innerHTML = nearbyDonors.map(d => `
+                            <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition">
+                                <div class="h-8 w-8 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-black">
+                                    ${d.blood_group}
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold">${d.name}</p>
+                                    <p class="text-[10px] text-gray-500">${d.location}</p>
+                                </div>
+                                <span class="h-2 w-2 bg-green-500 rounded-full"></span>
+                            </div>
+                        `).join('');
+                    }
+
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                }
+            }
+
+            function getUrgencyBadge(urgency) {
+                const styles = {
+                    critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border-red-200',
+                    high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 border-orange-200',
+                    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border-yellow-200',
+                    low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-200'
+                };
+                return `<span class="px-2 py-0.5 text-[10px] font-bold rounded border uppercase ${styles[urgency] || styles.low}">${urgency}</span>`;
+            }
+
+            loadHospitalData();
+        });
+    </script>
+</body>
+</html>

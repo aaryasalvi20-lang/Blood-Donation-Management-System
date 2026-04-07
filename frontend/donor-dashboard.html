@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donor Dashboard - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { primary: '#dc2626' } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md dark:bg-gray-800 flex-shrink-0 flex flex-col transition-all duration-300 z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
+            <svg class="h-8 w-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+            </svg>
+            <span class="ml-2 text-xl font-bold">BloodConnect</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <nav class="space-y-1 px-3" id="sidebar-nav">
+                <!-- Injected by script.js -->
+            </nav>
+
+            <!-- Eligibility Widget in Sidebar -->
+            <div class="mt-8 px-4">
+                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Eligibility Status</p>
+                    <div id="sidebar-eligibility">
+                        <div class="animate-pulse flex space-x-2">
+                            <div class="h-2 bg-gray-200 rounded w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="theme-toggle" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition">
+                <i class="fas fa-moon mr-2 dark:hidden" id="moon-icon"></i>
+                <i class="fas fa-sun mr-2 hidden dark:inline-block" id="sun-icon"></i>
+                Toggle Theme
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content wrapper -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 dark:bg-gray-800 dark:border-b dark:border-gray-700 z-10 transition-colors duration-300">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Donor Dashboard</h1>
+            
+            <div class="flex items-center space-x-4">
+                <button class="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none dark:hover:text-gray-300 transition" onclick="window.location.href='notifications.html'">
+                    <span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary ring-2 ring-white dark:ring-gray-800"></span>
+                    <i class="fas fa-bell text-xl"></i>
+                </button>
+                
+                <div class="relative flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                        <span class="user-init">D</span>
+                    </div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200 user-name-display">Donor Name</span>
+                    <button id="logout-btn" class="ml-4 text-sm font-medium text-red-600 hover:text-red-500 transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Profile & Stats -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 p-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 dark:bg-red-900/10 rounded-bl-full -mr-8 -mt-8 z-0"></div>
+                        
+                        <div class="relative z-10">
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Welcome Back, <span class="user-name-display">Donor</span>!</h2>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="donor-profile-summary">
+                                <!-- Loaded dynamically -->
+                                <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600 animate-pulse">
+                                    <div class="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                                    <div class="h-6 bg-gray-200 rounded w-3/4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nearby Urgent Requests -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white">Nearby Urgent Requests</h2>
+                            <span class="text-xs font-medium text-primary bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-full uppercase tracking-wider">Live Updates</span>
+                        </div>
+                        <div id="nearby-requests-list" class="space-y-4">
+                            <!-- Loaded dynamically -->
+                            <div class="text-center py-8 text-gray-500">Searching for units in your area...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar column: Availability & Eligibility -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 p-6">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Availability Status</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">When active, hospitals can find you in search results for urgent donor matching.</p>
+                        
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                            <span id="availability-status-text" class="text-sm font-bold text-gray-500">Loading...</span>
+                            <button id="toggle-availability-btn" class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary bg-gray-200 dark:bg-gray-600">
+                                <span aria-hidden="true" id="toggle-knob" class="translate-x-0 pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl shadow-lg p-6 text-white">
+                        <h3 class="text-lg font-bold mb-2">Ready to Save Lives?</h3>
+                        <p class="text-sm text-red-100 mb-4 opacity-90">Your eligibility is updated automatically when you donate at any participating hospital.</p>
+                        <div class="flex items-center space-x-2 bg-white/10 p-3 rounded-lg border border-white/20">
+                            <i class="fas fa-heartbeat text-xl"></i>
+                            <span class="text-sm font-medium">Last donation: <span id="last-donation-date-sidebar">Loading...</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth();
+            if(!user || user.role !== 'donor') return;
+            
+            // Set User Inititals
+            document.querySelectorAll('.user-init').forEach(el => {
+                el.textContent = user.name.charAt(0).toUpperCase();
+            });
+
+            async function loadDonorData() {
+                try {
+                    const profile = await apiFetch('/donors/profile');
+                    const requests = await apiFetch('/requests');
+                    
+                    // 1. Update Profile Summary Cards
+                    const summary = document.getElementById('donor-profile-summary');
+                    
+                    const eligibilityData = calculateEligibility(profile.last_donation_date);
+                    
+                    summary.innerHTML = `
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Blood Group</p>
+                            <p class="text-2xl font-black text-primary">${profile.blood_group}</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Location</p>
+                            <p class="text-lg font-bold truncate">${profile.location}</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Status</p>
+                            <div>${eligibilityData.badge}</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Age</p>
+                            <p class="text-lg font-bold">${profile.age} years</p>
+                        </div>
+                    `;
+
+                    // 2. Update Sidebar Eligibility
+                    document.getElementById('sidebar-eligibility').innerHTML = eligibilityData.longText;
+                    document.getElementById('last-donation-date-sidebar').textContent = profile.last_donation_date ? new Date(profile.last_donation_date).toLocaleDateString() : 'Never';
+
+                    // 3. Availability Toggle
+                    setupAvailabilityToggle(profile.is_available === 1 || profile.is_available === true);
+
+                    // 4. Update Nearby Requests
+                    const nearbyList = document.getElementById('nearby-requests-list');
+                    const nearbyRequests = requests.filter(r => 
+                        r.status === 'active' && 
+                        r.location.toLowerCase().includes(profile.location.toLowerCase()) &&
+                        r.blood_group === profile.blood_group
+                    );
+
+                    if (nearbyRequests.length === 0) {
+                        nearbyList.innerHTML = `
+                            <div class="text-center py-10 bg-gray-50 dark:bg-gray-700/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-600">
+                                <i class="fas fa-search text-gray-300 text-4xl mb-3"></i>
+                                <p class="text-gray-500">No matching requests in your area right now.</p>
+                            </div>
+                        `;
+                    } else {
+                        nearbyList.innerHTML = nearbyRequests.map(req => `
+                            <div class="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm dark:bg-gray-700 dark:border-gray-600 hover:border-primary transition">
+                                <div class="flex items-center space-x-4">
+                                    <div class="h-10 w-10 rounded-full bg-red-100 text-primary flex items-center justify-center font-bold dark:bg-red-900/30">
+                                        ${req.blood_group}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white">${req.hospital_name}</p>
+                                        <p class="text-xs text-gray-500">${req.location} • ${req.units_required} units needed</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    ${getUrgencyBadge(req.urgency)}
+                                    <button onclick="acceptRequest(${req.id}, this)" class="block w-full mt-2 text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter">Accept Request</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                }
+            }
+
+            window.acceptRequest = async (id, btn) => {
+                if(!confirm('Are you sure you want to accept this request? The hospital will be notified.')) return;
+                
+                try {
+                    btn.disabled = true;
+                    btn.textContent = 'Accepting...';
+                    await apiFetch(`/requests/${id}/respond`, { method: 'POST' });
+                    alert('Request accepted! Thank you for your kindness.');
+                    btn.textContent = 'ACCEPTED';
+                    btn.classList.add('text-green-600');
+                    btn.classList.remove('text-primary');
+                    btn.onclick = null;
+                } catch (err) {
+                    alert(err.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Accept Request';
+                }
+            };
+
+            function getUrgencyBadge(urgency) {
+                const colors = {
+                    critical: 'bg-red-600 text-white animate-pulse',
+                    high: 'bg-red-100 text-red-700',
+                    medium: 'bg-yellow-100 text-yellow-700',
+                    low: 'bg-gray-100 text-gray-600'
+                };
+                return `<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${colors[urgency] || colors.low}">${urgency}</span>`;
+            }
+
+            function calculateEligibility(lastDate) {
+                if (!lastDate) {
+                    return {
+                        badge: '<span class="px-2 py-0.5 text-xs font-bold rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">ELIGIBLE</span>',
+                        longText: '<span class="text-sm font-medium text-green-600 dark:text-green-400"><i class="fas fa-check-circle mr-1"></i> You are ready to donate!</span>'
+                    };
+                }
+                
+                const diffTime = Math.abs(new Date() - new Date(lastDate));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                
+                if (diffDays >= 90) {
+                    return {
+                        badge: '<span class="px-2 py-0.5 text-xs font-bold rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">ELIGIBLE</span>',
+                        longText: '<span class="text-sm font-medium text-green-600 dark:text-green-400"><i class="fas fa-check-circle mr-1"></i> You are ready to donate!</span>'
+                    };
+                } else {
+                    return {
+                        badge: '<span class="px-2 py-0.5 text-xs font-bold rounded bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">WAITING</span>',
+                        longText: `<span class="text-sm font-medium text-yellow-600 dark:text-yellow-400"><i class="fas fa-clock mr-1"></i> Eligible in ${90 - diffDays} days</span>`
+                    };
+                }
+            }
+
+            function getUrgencyBadge(urgency) {
+                const styles = {
+                    critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border-red-200',
+                    high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 border-orange-200',
+                    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border-yellow-200',
+                    low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-200'
+                };
+                return `<span class="px-2 py-1 text-[10px] font-bold rounded border uppercase tracking-widest ${styles[urgency] || styles.low}">${urgency}</span>`;
+            }
+
+            function setupAvailabilityToggle(initialState) {
+                const tBtn = document.getElementById('toggle-availability-btn');
+                const tKnob = document.getElementById('toggle-knob');
+                const tText = document.getElementById('availability-status-text');
+                let isAvail = initialState;
+
+                const updateToggleUI = () => {
+                    if (isAvail) {
+                        tBtn.classList.replace('bg-gray-200', 'bg-green-500');
+                        tBtn.classList.replace('dark:bg-gray-600', 'bg-green-500');
+                        tKnob.classList.add('translate-x-5');
+                        tText.textContent = "Available";
+                        tText.classList.replace('text-red-500', 'text-green-600');
+                        tText.classList.replace('text-gray-500', 'text-green-600');
+                    } else {
+                        tBtn.classList.replace('bg-green-500', 'bg-gray-200');
+                        tBtn.classList.add('dark:bg-gray-600');
+                        tKnob.classList.remove('translate-x-5');
+                        tText.textContent = "Unavailable";
+                        tText.classList.replace('text-green-600', 'text-red-500');
+                        tText.classList.replace('text-gray-500', 'text-red-500');
+                    }
+                };
+
+                updateToggleUI();
+
+                tBtn.addEventListener('click', async () => {
+                    try {
+                        tBtn.disabled = true;
+                        await apiFetch('/donors/toggle-availability', {
+                            method: 'PUT',
+                            body: JSON.stringify({ is_available: !isAvail })
+                        });
+                        isAvail = !isAvail;
+                        updateToggleUI();
+                    } catch (e) {
+                        alert(e.message);
+                    } finally {
+                        tBtn.disabled = false;
+                    }
+                });
+            }
+
+            loadDonorData();
+        });
+    </script>
+</body>
+</html>
