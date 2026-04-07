@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { primary: '#dc2626' } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    
+    <div class="max-w-md w-full space-y-8 glass p-10 rounded-2xl shadow-xl dark:bg-gray-800">
+        <div>
+            <div class="flex justify-center text-primary">
+                <svg class="h-12 w-12" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                Welcome back
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                Log in to your account
+            </p>
+        </div>
+        
+        <!-- Toggle Tabs -->
+        <div class="flex border-b border-gray-200 dark:border-gray-700">
+            <button id="tab-donor" class="flex-1 py-4 text-center font-medium text-primary border-b-2 border-primary focus:outline-none">
+                Donor
+            </button>
+            <button id="tab-hospital" class="flex-1 py-4 text-center font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none border-b-2 border-transparent">
+                Hospital
+            </button>
+        </div>
+
+        <form id="login-form" class="mt-8 space-y-6">
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"></div>
+            
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="email-address" class="sr-only">Email address</label>
+                    <input id="email-address" name="email" type="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Email address">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Password</label>
+                    <input id="password" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Password">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" id="submit-btn" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition shadow-md">
+                    <span id="btn-text">Sign in</span>
+                    <div id="btn-spinner" class="spinner hidden ml-2 border-white border-t-transparent"></div>
+                </button>
+            </div>
+        </form>
+        <div class="text-center text-sm">
+            <span class="text-gray-600 dark:text-gray-400">Don't have an account? </span>
+            <a href="register.html" class="font-medium text-primary hover:text-red-500 transition">Sign up</a>
+        </div>
+    </div>
+
+    <!-- Theme Toggle absolute position top right for simplicity -->
+    <button id="theme-toggle" class="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition">
+        <svg id="moon-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="sun-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 4.22a1 1 0 011.415 0l.708.708a1 1 0 01-1.414 1.414l-.708-.708a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.22 15.636a1 1 0 010 1.414l-.708.708a1 1 0 01-1.414-1.414l.708-.708a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.414a1 1 0 01-1.414 1.414l-.708-.708a1 1 0 011.414-1.414l.708.708zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zM5.78 5.636a1 1 0 010-1.414l.708-.708a1 1 0 011.414 1.414l-.708.708a1 1 0 01-1.414 0z"></path></svg>
+    </button>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let role = 'donor';
+            const tabDonor = document.getElementById('tab-donor');
+            const tabHospital = document.getElementById('tab-hospital');
+            const form = document.getElementById('login-form');
+            const errorDiv = document.getElementById('error-message');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+
+            function switchTab(newRole) {
+                role = newRole;
+                if(role === 'donor') {
+                    tabDonor.classList.replace('text-gray-500', 'text-primary');
+                    tabDonor.classList.replace('border-transparent', 'border-primary');
+                    tabDonor.classList.remove('hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
+                    
+                    tabHospital.classList.replace('text-primary', 'text-gray-500');
+                    tabHospital.classList.replace('border-primary', 'border-transparent');
+                    tabHospital.classList.add('hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
+                } else {
+                    tabHospital.classList.replace('text-gray-500', 'text-primary');
+                    tabHospital.classList.replace('border-transparent', 'border-primary');
+                    tabHospital.classList.remove('hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
+                    
+                    tabDonor.classList.replace('text-primary', 'text-gray-500');
+                    tabDonor.classList.replace('border-primary', 'border-transparent');
+                    tabDonor.classList.add('hover:text-gray-700', 'dark:text-gray-400', 'dark:hover:text-gray-200');
+                }
+            }
+
+            tabDonor.addEventListener('click', () => switchTab('donor'));
+            tabHospital.addEventListener('click', () => switchTab('hospital'));
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorDiv.classList.add('hidden');
+                btnText.classList.add('hidden');
+                btnSpinner.classList.remove('hidden');
+
+                const payload = {
+                    email: form.email.value,
+                    password: form.password.value
+                };
+
+                try {
+                    const data = await apiFetch(`/auth/login/${role}`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    loginSuccess(data);
+                } catch (error) {
+                    errorDiv.textContent = error.message;
+                    errorDiv.classList.remove('hidden');
+                } finally {
+                    btnText.classList.remove('hidden');
+                    btnSpinner.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

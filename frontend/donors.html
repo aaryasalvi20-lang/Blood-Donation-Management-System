@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donors - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#dc2626' } } } }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar (Same as dashboard) -->
+    <aside class="w-64 bg-white shadow-md dark:bg-gray-800 flex-shrink-0 flex flex-col z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
+            <svg class="h-8 w-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                    clip-rule="evenodd" />
+            </svg>
+            <span class="ml-2 text-xl font-bold">BloodConnect</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <nav class="space-y-1 px-3" id="sidebar-nav">
+                <!-- Injected by script.js -->
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="theme-toggle"
+                class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition">
+                <i class="fas fa-moon mr-2 dark:hidden" id="moon-icon"></i>
+                <i class="fas fa-sun mr-2 hidden dark:inline-block" id="sun-icon"></i>
+                Toggle Theme
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header
+            class="h-16 bg-white shadow-sm flex items-center justify-between px-6 dark:bg-gray-800 dark:border-b dark:border-gray-700 z-10 transition-colors duration-300">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Donors Directory</h1>
+            <div class="flex items-center space-x-4">
+                <div class="relative flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                        <span class="user-init">U</span></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200 user-name-display">User
+                        Name</span>
+                    <button id="logout-btn"
+                        class="ml-4 text-sm font-medium text-red-600 hover:text-red-500">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6">
+
+            <!-- Filters -->
+            <div
+                class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 mb-6 glass">
+                <div class="flex flex-col md:flex-row md:items-end gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search
+                            Donor</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="search-input" placeholder="Search by name..."
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Blood
+                            Group</label>
+                        <select id="filter-blood"
+                            class="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="all">All Groups</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City/Location</label>
+                        <input type="text" id="filter-city" placeholder="Filter by city"
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <div>
+                        <button id="filter-btn"
+                            class="w-full md:w-auto px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-red-700 focus:outline-none">
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Donors Grid -->
+            <div id="donors-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Loading State -->
+                <div class="col-span-full flex justify-center py-10">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth();
+            const grid = document.getElementById('donors-grid');
+            let allDonors = [];
+
+            function renderDonors(donors) {
+                grid.innerHTML = '';
+                if (donors.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">No donors found.</div>`;
+                    return;
+                }
+
+                donors.forEach(donor => {
+                    const isAvail = donor.is_available === 1 || donor.is_available === true;
+                    // Eligibility logic already computed by backend or we can do it here.
+                    const isEligible = donor.is_eligible;
+
+                    const availBadge = isAvail
+                        ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"><span class="w-2 h-2 mr-1.5 bg-green-500 rounded-full"></span>Available</span>`
+                        : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"><span class="w-2 h-2 mr-1.5 bg-red-500 rounded-full"></span>Not Available</span>`;
+
+                    const eligBadge = isEligible
+                        ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded border border-yellow-200 text-xs font-medium bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700"><i class="fas fa-check-circle mr-1"></i> Eligible</span>`
+                        : `<span class="inline-flex items-center px-2.5 py-0.5 rounded border border-gray-200 text-xs font-medium bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">Not Eligible</span>`;
+
+                    const recordBtn = user.role === 'hospital'
+                        ? `<button onclick="recordDonation(${donor.id})" class="mt-4 w-full py-2 bg-red-50 text-primary border border-red-200 rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all flex items-center justify-center">
+                                <i class="fas fa-plus-circle mr-2"></i> Record Donation
+                           </button>`
+                        : '';
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col dark:bg-gray-800 dark:border-gray-700 hover:shadow-md transition transform hover:-translate-y-1 group relative overflow-hidden";
+
+                    // Decorative accent
+                    card.innerHTML = `
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-red-100 to-transparent dark:from-red-900/40 rounded-bl-3xl z-0 transition-opacity opacity-50 group-hover:opacity-100"></div>
+                        <div class="relative z-10 flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">${donor.name}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1"><i class="fas fa-map-marker-alt mr-1"></i> ${donor.location}</p>
+                            </div>
+                            <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-primary border border-red-100 shadow-inner dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-xl font-black">${donor.blood_group}</span>
+                            </div>
+                        </div>
+                        <div class="mt-auto flex flex-wrap gap-2">
+                            ${availBadge}
+                            ${eligBadge}
+                        </div>
+                        ${recordBtn}
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            window.recordDonation = async (donorId) => {
+                if (!confirm('Record a new donation for this donor? This will update their eligibility for the next 90 days.')) return;
+
+                try {
+                    await apiFetch(`/donors/${donorId}/donate`, {
+                        method: 'POST'
+                    });
+                    alert('Donation recorded successfully!');
+                    // Refresh data
+                    allDonors = await apiFetch('/donors');
+                    renderDonors(allDonors);
+                } catch (e) {
+                    alert('Error recording donation: ' + e.message);
+                }
+            };
+
+            // Initial Load
+            try {
+                allDonors = await apiFetch('/donors');
+                renderDonors(allDonors);
+            } catch (e) {
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">Error loading donors: ${e.message}</div>`;
+            }
+
+            // Filtering Logic
+            document.getElementById('filter-btn').addEventListener('click', () => {
+                const q = document.getElementById('search-input').value.toLowerCase();
+                const b = document.getElementById('filter-blood').value;
+                const c = document.getElementById('filter-city').value.toLowerCase();
+
+                const filtered = allDonors.filter(d => {
+                    const matchQ = d.name.toLowerCase().includes(q);
+                    const matchB = b === 'all' || d.blood_group === b;
+                    const matchC = !c || d.location.toLowerCase().includes(c);
+                    return matchQ && matchB && matchC;
+                });
+                renderDonors(filtered);
+            });
+        });
+    </script>
+</body>
+
+</html>

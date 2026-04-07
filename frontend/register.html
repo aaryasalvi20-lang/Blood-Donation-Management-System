@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { primary: '#dc2626' } } }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    
+    <div class="max-w-xl w-full space-y-8 glass p-10 rounded-2xl shadow-xl dark:bg-gray-800">
+        <div>
+            <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                Create an account
+            </h2>
+        </div>
+        
+        <!-- Toggle Tabs -->
+        <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+            <button id="tab-donor" class="flex-1 py-4 text-center font-medium text-primary border-b-2 border-primary focus:outline-none">
+                Register as Donor
+            </button>
+            <button id="tab-hospital" class="flex-1 py-4 text-center font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none border-b-2 border-transparent">
+                Register as Hospital
+            </button>
+        </div>
+
+        <form id="register-form" class="space-y-6">
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Common Fields -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name / Organization Name</label>
+                    <input name="name" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
+                    <input name="email" type="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                    <input name="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">City / Location</label>
+                    <input name="location" type="text" required placeholder="e.g. New York" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+
+                <!-- Donor Specific Fields -->
+                <div class="donor-field">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Age</label>
+                    <input id="age" name="age" type="number" min="18" max="65" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div class="donor-field">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Blood Group</label>
+                    <select id="blood_group" name="blood_group" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                <div class="donor-field md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Donation Date (Optional)</label>
+                    <input id="last_donation_date" name="last_donation_date" type="date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" id="submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition shadow-md">
+                    <span id="btn-text">Sign Up</span>
+                    <div id="btn-spinner" class="spinner hidden ml-2 border-white border-t-transparent"></div>
+                </button>
+            </div>
+        </form>
+        <div class="text-center text-sm mt-4">
+            <span class="text-gray-600 dark:text-gray-400">Already have an account? </span>
+            <a href="login.html" class="font-medium text-primary hover:text-red-500 transition">Sign in</a>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="absolute top-4 right-4 p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition">
+        <svg id="moon-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="sun-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 4.22a1 1 0 011.415 0l.708.708a1 1 0 01-1.414 1.414l-.708-.708a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.22 15.636a1 1 0 010 1.414l-.708.708a1 1 0 01-1.414-1.414l.708-.708a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.414a1 1 0 01-1.414 1.414l-.708-.708a1 1 0 011.414-1.414l.708.708zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zM5.78 5.636a1 1 0 010-1.414l.708-.708a1 1 0 011.414 1.414l-.708.708a1 1 0 01-1.414 0z"></path></svg>
+    </button>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let role = 'donor';
+            const tabDonor = document.getElementById('tab-donor');
+            const tabHospital = document.getElementById('tab-hospital');
+            const form = document.getElementById('register-form');
+            const donorFields = document.querySelectorAll('.donor-field');
+            const errorDiv = document.getElementById('error-message');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+
+            function switchTab(newRole) {
+                role = newRole;
+                if(role === 'donor') {
+                    tabDonor.classList.replace('text-gray-500', 'text-primary');
+                    tabDonor.classList.replace('border-transparent', 'border-primary');
+                    tabHospital.classList.replace('text-primary', 'text-gray-500');
+                    tabHospital.classList.replace('border-primary', 'border-transparent');
+                    donorFields.forEach(el => el.style.display = 'block');
+                    document.getElementById('age').required = true;
+                    document.getElementById('blood_group').required = true;
+                } else {
+                    tabHospital.classList.replace('text-gray-500', 'text-primary');
+                    tabHospital.classList.replace('border-transparent', 'border-primary');
+                    tabDonor.classList.replace('text-primary', 'text-gray-500');
+                    tabDonor.classList.replace('border-primary', 'border-transparent');
+                    donorFields.forEach(el => el.style.display = 'none');
+                    document.getElementById('age').required = false;
+                    document.getElementById('blood_group').required = false;
+                }
+            }
+
+            tabDonor.addEventListener('click', () => switchTab('donor'));
+            tabHospital.addEventListener('click', () => switchTab('hospital'));
+            
+            // initialize view
+            switchTab('donor');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                errorDiv.classList.add('hidden');
+                btnText.classList.add('hidden');
+                btnSpinner.classList.remove('hidden');
+
+                const payload = {
+                    name: form.name.value,
+                    email: form.email.value,
+                    password: form.password.value,
+                    location: form.location.value
+                };
+
+                if (role === 'donor') {
+                    payload.age = form.age.value;
+                    payload.blood_group = form.blood_group.value;
+                    if (form.last_donation_date.value) {
+                        payload.last_donation_date = form.last_donation_date.value;
+                    }
+                }
+
+                try {
+                    const data = await apiFetch(`/auth/register/${role}`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    loginSuccess(data);
+                } catch (error) {
+                    errorDiv.textContent = error.message;
+                    errorDiv.classList.remove('hidden');
+                } finally {
+                    btnText.classList.remove('hidden');
+                    btnSpinner.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

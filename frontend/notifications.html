@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - BloodConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { primary: '#dc2626' } } } }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-900 font-['Inter'] dark:bg-gray-900 dark:text-gray-100 flex h-screen overflow-hidden">
+
+    <aside class="w-64 bg-white shadow-md dark:bg-gray-800 flex-shrink-0 flex flex-col z-20">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
+            <svg class="h-8 w-8 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+            <span class="ml-2 text-xl font-bold">BloodConnect</span>
+        </div>
+        <div class="flex-1 overflow-y-auto py-4">
+            <nav class="space-y-1 px-3" id="sidebar-nav">
+                <!-- Injected by script.js -->
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="theme-toggle" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 transition">
+                <i class="fas fa-moon mr-2 dark:hidden" id="moon-icon"></i>
+                <i class="fas fa-sun mr-2 hidden dark:inline-block" id="sun-icon"></i>
+                Toggle Theme
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 dark:bg-gray-800 dark:border-b dark:border-gray-700 z-10 transition-colors duration-300">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Notifications</h1>
+            <div class="flex items-center space-x-4">
+                <div class="relative flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold"><span class="user-init">U</span></div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200 user-name-display">User Name</span>
+                    <button id="logout-btn" class="ml-4 text-sm font-medium text-red-600 hover:text-red-500">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6 relative flex justify-center">
+            
+            <div class="max-w-3xl w-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Recent Activity</h2>
+                    </div>
+                    <ul id="notifications-list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <li class="p-6 text-center">
+                            <div class="spinner mx-auto"></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const list = document.getElementById('notifications-list');
+            try {
+                const notifications = await apiFetch('/notifications');
+                list.innerHTML = '';
+
+                if(notifications.length === 0) {
+                    list.innerHTML = `<li class="p-8 text-center text-gray-500 dark:text-gray-400"><i class="far fa-bell-slash text-4xl mb-3 opacity-50 block"></i>You have no notifications.</li>`;
+                    return;
+                }
+
+                notifications.forEach(n => {
+                    const isRead = n.is_read === 1 || n.is_read === true;
+                    // Format relative time simplistic
+                    const date = new Date(n.created_at);
+                    
+                    const li = document.createElement('li');
+                    li.className = `p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-start gap-4 ${!isRead ? 'bg-red-50/50 dark:bg-red-900/10' : ''}`;
+                    
+                    const iconBg = n.type === 'request_match' ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400';
+                    const iconClass = n.type === 'request_match' ? 'fas fa-heartbeat' : 'fas fa-info-circle';
+
+                    li.innerHTML = `
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="h-10 w-10 rounded-full flex items-center justify-center ${iconBg}">
+                                <i class="${iconClass}"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between">
+                                <p class="text-sm font-medium ${!isRead ? 'text-gray-900 dark:text-white font-bold' : 'text-gray-700 dark:text-gray-300'}">
+                                    ${n.message}
+                                </p>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">${date.toLocaleDateString()}</span>
+                            </div>
+                            ${!isRead ? `<button onclick="markRead(${n.id}, this)" class="mt-2 text-xs text-primary hover:text-red-700 font-medium">Mark as read</button>` : ''}
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch(e) {
+                list.innerHTML = `<li class="p-6 text-center text-red-500">Error loading notifications: ${e.message}</li>`;
+            }
+        });
+
+        async function markRead(id, btnElement) {
+            try {
+                await apiFetch(`/notifications/${id}/read`, { method: 'PUT' });
+                // Update UI visually without reload
+                const li = btnElement.closest('li');
+                li.classList.remove('bg-red-50/50', 'dark:bg-red-900/10');
+                li.querySelector('p').classList.replace('font-bold', 'font-medium');
+                li.querySelector('p').classList.replace('text-gray-900', 'text-gray-700');
+                btnElement.remove();
+            } catch(e) {
+                alert('Could not mark as read');
+            }
+        }
+    </script>
+</body>
+</html>
